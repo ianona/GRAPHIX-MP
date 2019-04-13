@@ -63,6 +63,11 @@
             var spaceWall    = THREE.ImageUtils.loadTexture("assets/space_wall.jpg")
             var rockTexture1    = THREE.ImageUtils.loadTexture("assets/rock_texture2.jpg")
 
+            // imported Blender meshes
+            var rockMesh = undefined
+            var treeMesh = undefined
+            var torchMesh = undefined
+
             // Box2D shortcuts
             var b2World        = Box2D.Dynamics.b2World,
                 b2FixtureDef   = Box2D.Dynamics.b2FixtureDef,
@@ -140,111 +145,108 @@
             }
 
             function initMap(){
-                var loader = new THREE.JSONLoader();
-                var loader2 = new THREE.OBJLoader();
+
                 switch(map){
                     case "jungle":
-                        loader.load("blender/rockv1.js", function (rock1Geometry) {
-                            for (var i=0;i<mazeDimension;i++){
-                                var leftMesh = new THREE.Mesh(rock1Geometry)
-                                leftMesh.material = new THREE.MeshPhongMaterial({map:rockTexture1,specular: 0xffffff, shininess: 30, flatShading:false})
-                                leftMesh.rotation.x=90
-                                if (Math.random() < 0.5){
-                                    leftMesh.position.set(-1,i,.5)
-                                    leftMesh.rotation.y = 90
-                                } else {
-                                    leftMesh.position.set(-1,i,.5)
-                                    leftMesh.rotation.y = -90
-                                }
-                                scene.add(leftMesh);
-                                var topMesh = new THREE.Mesh(rock1Geometry)
-                                topMesh.material = new THREE.MeshPhongMaterial({map:rockTexture1,specular: 0xffffff, shininess: 30, flatShading:false})
-                                topMesh.rotation.x=90
-                                topMesh.position.set(i,mazeDimension+.5,.5)
-                                if (Math.random() < 0.5){
-                                    topMesh.rotation.y = 180
-                                } 
-                                scene.add(topMesh);
 
-                                var rightMesh = new THREE.Mesh(rock1Geometry)
-                                rightMesh.material = new THREE.MeshPhongMaterial({map:rockTexture1,specular: 0xffffff, shininess: 30, flatShading:false})
-                                rightMesh.rotation.x=90
-                                if (Math.random() < 0.5){
-                                    rightMesh.rotation.y = 90
-                                    rightMesh.position.set(mazeDimension,i,.5)
+                        for (var i=0;i<mazeDimension;i++){
+                            var leftMesh = new THREE.Mesh(rockMesh)
+                            leftMesh.material = new THREE.MeshPhongMaterial({map:rockTexture1,specular: 0xffffff, shininess: 30, flatShading:false})
+                            leftMesh.rotation.x=90
+                            if (Math.random() < 0.5){
+                                leftMesh.position.set(-1,i,.5)
+                                leftMesh.rotation.y = 90
+                            } else {
+                                leftMesh.position.set(-1,i,.5)
+                                leftMesh.rotation.y = -90
+                            }
+                            scene.add(leftMesh);
+                            var topMesh = new THREE.Mesh(rockMesh)
+                            topMesh.material = new THREE.MeshPhongMaterial({map:rockTexture1,specular: 0xffffff, shininess: 30, flatShading:false})
+                            topMesh.rotation.x=90
+                            topMesh.position.set(i,mazeDimension+.5,.5)
+                            if (Math.random() < 0.5){
+                                topMesh.rotation.y = 180
+                            } 
+                            scene.add(topMesh);
 
-                                } else {
-                                    rightMesh.rotation.y = -90
-                                    rightMesh.position.set(mazeDimension+.5,i,.5)
+                            var rightMesh = new THREE.Mesh(rockMesh)
+                            rightMesh.material = new THREE.MeshPhongMaterial({map:rockTexture1,specular: 0xffffff, shininess: 30, flatShading:false})
+                            rightMesh.rotation.x=90
+                            if (Math.random() < 0.5){
+                                rightMesh.rotation.y = 90
+                                rightMesh.position.set(mazeDimension,i,.5)
 
-                                }
-                                if (i <= mazeDimension - 4) scene.add(rightMesh);
+                            } else {
+                                rightMesh.rotation.y = -90
+                                rightMesh.position.set(mazeDimension+.5,i,.5)
 
                             }
-                        } );
+                            if (i <= mazeDimension - 4) scene.add(rightMesh);
 
-                        loader2.load( "blender/tree.obj", function (treeMesh) {
-                            treeMesh.material = new THREE.MeshPhongMaterial({map:rockTexture1,specular: 0xffffff, shininess: 30, flatShading:false})
-                            treeMesh.rotation.x = 90
-                            console.log("TREE")
-                            console.log(treeMesh)
+                        }
 
 
-                            for (var i=0;i<mazeDimension;i++){
-                                if (Math.random() < 0.4){
-                                    var branchMesh = new THREE.Mesh(treeMesh.children[1].geometry,new THREE.MeshPhongMaterial({color:0x5a3b24,specular: 0xffffff, shininess: 30, flatShading:false}))
-                                    branchMesh.position.set(0,i,0)
-                                    branchMesh.rotation.x = 90
-                                    scene.add(branchMesh);
+                        treeMesh.material = new THREE.MeshPhongMaterial({map:rockTexture1,specular: 0xffffff, shininess: 30, flatShading:false})
+                        treeMesh.rotation.x = 90
+                        console.log("TREE")
+                        console.log(treeMesh)
 
-                                    var leafMesh = new THREE.Mesh(treeMesh.children[2].geometry,new THREE.MeshPhongMaterial({color:0x398933,specular: 0xffffff, shininess: 30, flatShading:false}))
-                                    leafMesh.position.set(0,i,0)
-                                    leafMesh.rotation.x = 90
-                                    scene.add(leafMesh);
 
-                                    var branchMesh2 = new THREE.Mesh(treeMesh.children[1].geometry,new THREE.MeshPhongMaterial({color:0x5a3b24,specular: 0xffffff, shininess: 30, flatShading:false}))
-                                    branchMesh2.position.set(i,mazeDimension,0)
-                                    branchMesh2.rotation.x = 90
-                                    scene.add(branchMesh2);
+                        for (var i=0;i<mazeDimension;i++){
+                            if (Math.random() < 0.4){
+                                var branchMesh = new THREE.Mesh(treeMesh.children[1].geometry,new THREE.MeshPhongMaterial({color:0x5a3b24,specular: 0xffffff, shininess: 30, flatShading:false}))
+                                branchMesh.position.set(0,i,0)
+                                branchMesh.rotation.x = 90
+                                scene.add(branchMesh);
 
-                                    var leafMesh2 = new THREE.Mesh(treeMesh.children[2].geometry,new THREE.MeshPhongMaterial({color:0x398933,specular: 0xffffff, shininess: 30, flatShading:false}))
-                                    leafMesh2.position.set(i,mazeDimension,0)
-                                    leafMesh2.rotation.x = 90
-                                    scene.add(leafMesh2);
+                                var leafMesh = new THREE.Mesh(treeMesh.children[2].geometry,new THREE.MeshPhongMaterial({color:0x398933,specular: 0xffffff, shininess: 30, flatShading:false}))
+                                leafMesh.position.set(0,i,0)
+                                leafMesh.rotation.x = 90
+                                scene.add(leafMesh);
 
-                                    var branchMesh3 = new THREE.Mesh(treeMesh.children[1].geometry,new THREE.MeshPhongMaterial({color:0x5a3b24,specular: 0xffffff, shininess: 30, flatShading:false}))
-                                    branchMesh3.position.set(mazeDimension,i,0)
-                                    branchMesh3.rotation.x = 90
+                                var branchMesh2 = new THREE.Mesh(treeMesh.children[1].geometry,new THREE.MeshPhongMaterial({color:0x5a3b24,specular: 0xffffff, shininess: 30, flatShading:false}))
+                                branchMesh2.position.set(i,mazeDimension,0)
+                                branchMesh2.rotation.x = 90
+                                scene.add(branchMesh2);
 
-                                    var leafMesh3 = new THREE.Mesh(treeMesh.children[2].geometry,new THREE.MeshPhongMaterial({color:0x398933,specular: 0xffffff, shininess: 30, flatShading:false}))
-                                    leafMesh3.position.set(mazeDimension,i,0)
-                                    leafMesh3.rotation.x = 90
+                                var leafMesh2 = new THREE.Mesh(treeMesh.children[2].geometry,new THREE.MeshPhongMaterial({color:0x398933,specular: 0xffffff, shininess: 30, flatShading:false}))
+                                leafMesh2.position.set(i,mazeDimension,0)
+                                leafMesh2.rotation.x = 90
+                                scene.add(leafMesh2);
 
-                                    if (i <= mazeDimension - 4) {
-                                        scene.add(branchMesh3);
-                                        scene.add(leafMesh3);
+                                var branchMesh3 = new THREE.Mesh(treeMesh.children[1].geometry,new THREE.MeshPhongMaterial({color:0x5a3b24,specular: 0xffffff, shininess: 30, flatShading:false}))
+                                branchMesh3.position.set(mazeDimension,i,0)
+                                branchMesh3.rotation.x = 90
 
-                                    }
-                                } 
-                            }
-                            //                            for ( var i = 0, l = object.children.length; i < l; i ++ ) {
-                            //                                object.children[ i ].material = new THREE.MeshPhongMaterial({map:rockTexture1,specular: 0xffffff, shininess: 30, flatShading:false})
-                            //
-                            //                            }
-                        } );
+                                var leafMesh3 = new THREE.Mesh(treeMesh.children[2].geometry,new THREE.MeshPhongMaterial({color:0x398933,specular: 0xffffff, shininess: 30, flatShading:false}))
+                                leafMesh3.position.set(mazeDimension,i,0)
+                                leafMesh3.rotation.x = 90
+
+                                if (i <= mazeDimension - 4) {
+                                    scene.add(branchMesh3);
+                                    scene.add(leafMesh3);
+
+                                }
+                            } 
+                        }
+                        //                            for ( var i = 0, l = object.children.length; i < l; i ++ ) {
+                        //                                object.children[ i ].material = new THREE.MeshPhongMaterial({map:rockTexture1,specular: 0xffffff, shininess: 30, flatShading:false})
+                        //
+                        //                            }
+
 
                         planeMesh.material = new THREE.MeshPhongMaterial({map:jungleFloor,specular: 0xffffff, shininess: 30, flatShading:false})
                         mazeMesh.material = new THREE.MeshPhongMaterial({map:jungleWall,specular: 0xffffff, shininess: 30, flatShading:false})
                         break;
                     case "dungeon":
-                        loader2.load( "blender/torch.obj", function (torchMesh) {
-                            torchMesh.rotation.x = 90
-                            for (var i=0;i<mazeDimension;i++){
-                                if (i%2==0 && i <= mazeDimension - 3) {
-                                    generateTorch(i,torchMesh);
-                                }
+                        torchMesh.rotation.x = 90
+                        for (var i=0;i<mazeDimension;i++){
+                            if (i%2==0 && i <= mazeDimension - 3) {
+                                generateTorch(i,torchMesh);
                             }
-                        } );
+                        }
+
 
                         planeMesh.material = new THREE.MeshPhongMaterial({map:dungeonFloor,specular: 0xffffff, shininess: 30, flatShading:false})
                         mazeMesh.material = new THREE.MeshPhongMaterial({map:dungeonWall,specular: 0xffffff, shininess: 30, flatShading:false})
@@ -547,9 +549,9 @@
                 if (highscores.length > 5){
                     highscores.length = 5
                 }
-                
+
             }
-            
+
             function playMusic(mapVal){
                 switch (mapVal){
                     case 'jungle':
@@ -563,7 +565,7 @@
                         break;
                 }
             }
-            
+
             function stopMusic(){
                 A1.pause();
                 A2.pause();
@@ -573,7 +575,34 @@
                 A3.currentTime = 0;
             }
 
+            function updateLoader(){
+                if (treeMesh!=undefined && rockMesh!=undefined && torchMesh!=undefined) {
+                    $("div#loader").remove()
+                }
+            }
+
             $(document).ready(function(){
+                var loader = new THREE.JSONLoader();
+                var loader2 = new THREE.OBJLoader();
+                // Load blender
+                loader.load("blender/rockv1.js", function (rock1Geometry) {
+                    rockMesh = rock1Geometry
+                    console.log("Loaded: BLENDER Rock")
+                    updateLoader()
+                } );
+
+                loader2.load( "blender/tree.obj", function (mesh) {
+                    treeMesh = mesh;
+                    console.log("Loaded: BLENDER Tree")
+                    updateLoader()
+                });
+
+                loader2.load( "blender/torch.obj", function (mesh) {
+                    torchMesh = mesh
+                    console.log("Loaded: BLENDER Torch")
+                    updateLoader()
+                });
+
                 A1 = document.getElementById("jungle_Audio");
                 A2 = document.getElementById("dungeon_Audio");
                 A3 = document.getElementById("space_Audio");
@@ -696,7 +725,7 @@
                 height:100%;
                 margin:0 auto;
                 text-align: center;
-                padding-top:100px;
+                padding-top:60px;
             }
 
             .title{
@@ -741,22 +770,29 @@
     </head>
     <body>
         <audio id="jungle_Audio" src="assets/JUNGLE_MUSIC1.mp3" preload="auto">
-</audio>    
+        </audio>    
         <audio id="dungeon_Audio" src="assets/DUNGEON_MUSIC.mp3" preload="auto">
-</audio>
+        </audio>
         <audio id="space_Audio" src="assets/SPACE_MUSIC.mp3" preload="auto">
-</audio>
+        </audio>
         <h1 style='color:white;' id='timer'><time>00:00:00</time></h1>
         <h1 style='color:black;' id='highscore'><time>00:00:00</time></h1>
         <div class="wrapper">
             <div class="ui huge header title">Ball Game</div>
             <div class="ui header subtitle" id="map">Choose a map</div>
+            <div class="ui segment">
+                <div class="ui active dimmer" id="loader">
+                    <div class="ui text loader" >Loading Assets...</div>
 
-            <div class="ui images maps">
-                <img data-map="Jungle" class="ui medium rounded image" src="assets/jungle_menu.png">
-                <img data-map="Dungeon" class="ui medium rounded image" src="assets/dungeon_menu.png">
-                <img data-map="Space" class="ui medium rounded image" src="assets/space_menu.png">
+                </div>
+                <div class="ui images maps">
+                    <img data-map="Jungle" class="ui medium rounded image" src="assets/jungle_menu.png">
+                    <img data-map="Dungeon" class="ui medium rounded image" src="assets/dungeon_menu.png">
+                    <img data-map="Space" class="ui medium rounded image" src="assets/space_menu.png">
+                </div>
+                <p></p>
             </div>
+
 
             <div class="ui header subtitle">Choose a difficulty level</div>
             <div class="three large ui buttons difficultyMenu">
