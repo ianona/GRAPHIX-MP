@@ -1,10 +1,11 @@
-function generatePowerUps(vacantAreas) {
+function generatePowerUps(vacantAreas, amount) {
     //get 4 random unique places
     var places = 0;
-    var randomIndexd
-    while (places != 4) {
+    var randomIndex
+//    console.log(vacantAreas[0] + "TESTING VACANT AREA")
+    while (places != amount) {
         randomIndex = Math.floor(Math.random() * vacantAreas.length);
-        if (powerupSpaces.indexOf(vacantAreas[randomIndex]) == -1) {
+        if (powerupSpaces.indexOf(vacantAreas[randomIndex]) == -1 && randomIndex != 0) {
             powerupSpaces.push(vacantAreas[randomIndex]);
             places += 1;
         }
@@ -15,8 +16,9 @@ function generatePowerUps(vacantAreas) {
         // parsing
         var i = parseXCoordinate(powerupSpaces[k])
         var j = parseYCoordinate(powerupSpaces[k])
+        var temp = k % 4;
 
-        switch (k) {
+        switch (temp) {
             case 0:
                 var newMesh = generatePowerUpMesh('0x00ff80', i, j);
                 var newPowerUp = new PowerUp('speedB', newMesh)
@@ -32,14 +34,14 @@ function generatePowerUps(vacantAreas) {
                 console.log('x: ' + i + ' y: ' + j + ' speedD')
                 break;
             case 2:
-                var newMesh = generatePowerUpMesh('0x00ff80', i, j);
+                var newMesh = generatePowerUpMesh('0xe2ff00', i, j);
                 var newPowerUp = new PowerUp('viewB', newMesh)
                 powerUps.push(newPowerUp);
                 scene.add(newMesh);
                 console.log('x: ' + i + ' y: ' + j + ' viewB')
                 break;
             case 3:
-                var newMesh = generatePowerUpMesh('0xff0000', i, j);
+                var newMesh = generatePowerUpMesh('0x003a96', i, j);
                 var newPowerUp = new PowerUp('viewD', newMesh)
                 powerUps.push(newPowerUp);
                 scene.add(newMesh);
@@ -122,14 +124,14 @@ function triggerPowerup(powerup) {
             break;
         case 'viewB':
             //            console.log('test2');
-            camZoomIncrement = 5
+            camZoomIncrement = 3
             camZoom = camZoom + camZoomIncrement;
             light.intensity = 1;
             setTimeout(normalView, 5000);
             break;
         case 'viewD':
             //            console.log('test3');
-            camZoomIncrement = -10
+            camZoomIncrement = -3
             camZoom = camZoom + camZoomIncrement;
             light.intensity = 0.25;
             setTimeout(normalView, 5000);
@@ -146,16 +148,19 @@ function normalView() {
     switch (difficultyLevel) {
         case 'easy':
             light.intensity = .50;
+            camZoom = 10;
             break;
         case 'medium':
             light.intensity = .40;
+            camZoom = 8;
             break;
         case 'difficult':
-            light.intensity = .30;
+            light.intensity = .29;
+            camZoom = 5;
             break;
     }
 //    light.intensity = 0.5;
-    camZoom = camZoom - camZoomIncrement;
+//    camZoom = camZoom - camZoomIncrement;
 }
 
 //for delays
@@ -179,4 +184,12 @@ function resetState() {
     ballSpeed = 0.95;
     camZoom = 20;
     camZoomIncrement = 0;
+}
+
+function rotatePowerups(){
+    for (var j = 0; j < powerUps.length; j++) {
+        powerUps[j].getMesh().rotation.x += 0.08;
+        powerUps[j].getMesh().rotation.y += 0.08;
+        powerUps[j].getMesh().rotation.z += 0.08;
+    }
 }
