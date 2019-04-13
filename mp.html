@@ -332,7 +332,7 @@
                         }
                         break;
                     case 'play':
-                        
+                        console.log(camZoom);
                         updatePhysics();
                         updateGraphics();
                         detectPowerupCollision()
@@ -391,7 +391,10 @@
             function saveHighScore(){
                 highscores.push(new HighScore(timeVal, $("input#highscoreName").val(), map, difficultyLevel))
                 highscores.sort(function(a,b){return a.getTime()-b.getTime()})
-                highscores.length = 5
+                if (highscores.length > 5){
+                    highscores.length = 5
+                }
+                
             }
             
             function playMusic(mapVal){
@@ -584,7 +587,7 @@
         </style>
     </head>
     <body>
-        <audio id="jungle_Audio" src="assets/JUNGLE_MUSIC.mp3" preload="auto">
+        <audio id="jungle_Audio" src="assets/JUNGLE_MUSIC1.mp3" preload="auto">
 </audio>    
         <audio id="dungeon_Audio" src="assets/DUNGEON_MUSIC.mp3" preload="auto">
 </audio>

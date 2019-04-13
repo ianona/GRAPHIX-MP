@@ -125,7 +125,7 @@ function triggerPowerup(powerup) {
             $("div#buff").text("SPEED Debuff")
             break;
         case 'viewB':
-            //            console.log('test2');
+                        
             camZoomIncrement = 3
             camZoom = camZoom + camZoomIncrement;
             light.intensity = 1;
@@ -176,7 +176,9 @@ function normalView() {
             break;
     }
 //    light.intensity = 0.5;
-    camZoom = camZoom - camZoomIncrement;
+//    camZoom = camZoom - camZoomIncrement;
+//    console.log("CAAAAAAAAAAAAAMZOME")
+//    console.log(camZoom + " CAMZOOM VALUE");
     updateBuffText()
 }
 
