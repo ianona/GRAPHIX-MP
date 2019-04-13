@@ -21,7 +21,7 @@
             // variables for gameplay
             var map = undefined;
             var difficultyLevel = undefined;
-            var highscore = undefined;
+            var highscores = [];
             var timeVal = undefined;
             var A1 = undefined;
             var A2 = undefined;
@@ -258,11 +258,12 @@
             }
 
             function isHighscore(score){
-                if (highscore == undefined || score < highscore.getTime()){
-                    timeVal = score;
-                    console.log("HIGHSCORE CHECKED");
+                var sample = highscores.filter(score=>score==undefined||score==null)
+                if (sample.length > 0 || highscores.length < 5){
                     return true;
-                } else
+                } else if (highscores[4].getTime > score){
+                    return true;
+                } else 
                     return false;
             }
 
@@ -344,7 +345,8 @@
                         if (mazeX == mazeDimension && mazeY == mazeDimension - 2) { 
                             //                            mazeDimension += 2;
                             //                            gameState = "fade out";
-                            if (isHighscore(h1.textContent)) {
+                            timeVal = h1.textContent
+                            if (isHighscore(timeVal)) {
                                 $('div#highscoreModal').modal('show');
                                 resetState()
                                 resetTimer();
@@ -387,7 +389,9 @@
             }
 
             function saveHighScore(){
-                highscore = new HighScore(timeVal, $("input#highscoreName").val(), map, difficultyLevel);
+                highscores.push(new HighScore(timeVal, $("input#highscoreName").val(), map, difficultyLevel))
+                highscores.sort(function(a,b){return a.getTime()-b.getTime()})
+                highscores.length = 5
             }
             
             function playMusic(mapVal){
@@ -442,7 +446,7 @@
                     $("div#map").text("Choose a map");
                 })
 
-                $("button").click(function(event){
+                $("div.difficultyMenu button").click(function(event){
                     $("button").removeClass("primary");
                     $(event.target).addClass("primary");
                 })
@@ -470,19 +474,13 @@
                     if (tag==="save"){
                         saveHighScore();
                     }
-                    console.log(tag);
-                    console.log(highscore);
-                    if (highscore != undefined){
-                        $("h1#highscore").text("Highscore: " + highscore.getTime() + " Name: " + highscore.getName() + " Map: " + highscore.getMap() + " Difficulty: " + highscore.getDifficulty());
-                        $("h1#highscore").show();
-                    }
+
                     $("h1#timer").hide();
                     $("div.wrapper").show()
                     $("div#canvas").hide();
                     $("body").css("background","white");
                     gameState = undefined;
                     stopMusic()
-                    
                 })
 
                 $("div.playBtn").click(function(event){
@@ -491,6 +489,39 @@
                         saveHighScore();
                     }
                     gameState = "initialize";
+                })
+
+                $("button#highscoresBtn").click(function(event){
+                    $("tbody.highscoresBody").empty()
+                    console.log("HIGHSCORES: " + highscores.length)
+                    if (highscores.length==0){
+                        var row = document.createElement("tr");
+                        var cell = document.createElement("td");
+                        $(cell).text("NO HIGH SCORES")
+                        $(cell).attr("colspan",3)
+                        row.appendChild(cell)
+                        $("tbody.highscoresBody").append(row)
+                    }
+                    for (var i = 0; i<highscores.length;i++){
+                        console.log(highscores[i])
+                        if (highscores[i] == undefined) {
+                            $('div#highscoresModal').modal('show');
+                            return;
+                        }
+                        var row = document.createElement("tr");
+                        var name = document.createElement("td");
+                        $(name).text(highscores[i].getName())
+                        var map = document.createElement("td");
+                        $(map).text(highscores[i].getMap() + " (" + highscores[i].getDifficulty() + ")")
+                        var time = document.createElement("td");
+                        $(time).text(highscores[i].getTime())
+                        
+                        row.appendChild(name)
+                        row.appendChild(map)
+                        row.appendChild(time)
+                        $("tbody.highscoresBody").append(row)
+                    }
+                    $('div#highscoresModal').modal('show');
                 })
             })
 
@@ -541,6 +572,15 @@
                 text-align: center;
                 padding-top:20px;
             }
+
+            div#highscoresModal{
+                text-align:center;
+            }
+
+            button#highscoresBtn{
+                margin-top:30px!important;
+                float:left!important;
+            }
         </style>
     </head>
     <body>
@@ -563,11 +603,16 @@
             </div>
 
             <div class="ui header subtitle">Choose a difficulty level</div>
-            <div class="three large ui buttons">
+            <div class="three large ui buttons difficultyMenu">
                 <button class="primary ui button"><i class="smile outline icon"></i>Easy</button>
                 <button class="ui button"><i class="meh outline icon"></i>Medium</button>
                 <button class="ui button"><i class="frown outline icon"></i>Difficult</button>
             </div>
+
+            <button class="ui basic button" id="highscoresBtn">
+  <i class="icon eye"></i>
+  View High Scores
+</button>
         </div>
 
         <div id="canvas">
@@ -618,6 +663,39 @@
                 </div>
             </center>
         </div>
+
+        <div class="tiny ui modal" id="highscoresModal">
+  <div class="header">High Scores</div>
+  <div class="content">
+<table class="ui celled table">
+  <thead>
+    <tr><th>Name</th>
+    <th>Map</th>
+    <th>Time</th>
+  </tr></thead>
+  <tbody class="highscoresBody">
+    <tr>
+      <td data-label="Name">James</td>
+      <td data-label="Age">24</td>
+      <td data-label="Job">Engineer</td>
+    </tr>
+    <tr>
+      <td data-label="Name">Jill</td>
+      <td data-label="Age">26</td>
+      <td data-label="Job">Engineer</td>
+    </tr>
+    <tr>
+      <td data-label="Name">Elyse</td>
+      <td data-label="Age">24</td>
+      <td data-label="Job">Designer</td>
+    </tr>
+  </tbody>
+</table>
+  </div>
+  <div class="actions">
+    <div class="ui cancel button">Close</div>
+  </div>
+</div>
     </body>
     <script src="js/timer.js"></script>
 </html>

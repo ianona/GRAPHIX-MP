@@ -109,7 +109,6 @@ function detectPowerupCollision() {
 
 var currentBuffs = []
 function triggerPowerup(powerup) {
-    console.log("IM OVER HERE")
     switch (powerup) {
         case 'speedB':
             //            console.log('test');
