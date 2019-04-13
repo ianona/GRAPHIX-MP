@@ -177,7 +177,6 @@ function normalView() {
             break;
     }
 //    light.intensity = 0.5;
-<<<<<<< HEAD:js/powerUpPlus.js
     camZoom = camZoom - camZoomIncrement;
     updateBuffText()
 }
@@ -190,9 +189,6 @@ function updateBuffText(){
     var buff = powerup.substr(-1)
     $("div#buff").text($("div#buff").text() + "\n" + type + " " + buff)
     })
-=======
-//    camZoom = camZoom - camZoomIncrement;
->>>>>>> f8000d2f182ca46e216ce552d1b8ea0cc165d0b3:js/class/powerUpPlus.js
 }
 
 //for delays
