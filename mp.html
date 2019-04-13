@@ -44,7 +44,6 @@
             var powerUps = []; // list of powerup objects
             var ballSpeed = 0.95;
             var camZoomIncrement = 0;
-            var extraIntensity = 0;
 
             // Box2D shortcuts
             var b2World        = Box2D.Dynamics.b2World,
@@ -201,7 +200,20 @@
                 switch (gameState) {
                     case "initialize":
                         console.log("initializing game...")
-
+                        switch (difficultyLevel){
+                            case 'easy':
+                                mazeDimension  = 15;
+                                camZoom = 20;
+                                break;
+                            case 'medium':
+                                mazeDimension  = 23;
+                                camZoom = 17;
+                                break;
+                            case 'difficult':
+                                mazeDimension  = 31;
+                                camZoom = 14;
+                                break;
+                        }
                         maze = generateSquareMaze(mazeDimension);
                         maze[mazeDimension-1][mazeDimension-2] = false;
                         initPhysics();
@@ -213,12 +225,24 @@
                         $('#level').text(map.charAt(0).toUpperCase() + map.slice(1) + " (" + difficultyLevel.charAt(0).toUpperCase() + difficultyLevel.slice(1) + ")");
                         gameState = "fade in";
                         generatePowerUps(freeSpaces);
+                        
                         break;
                     case "fade in":
                         light.intensity += 0.1 * (1.0 - light.intensity);
                         renderer.render(scene, camera);
                         if (Math.abs(light.intensity - 1.0) < 0.05) {
                             light.intensity = .50;
+                            switch (difficultyLevel){
+                            case 'easy':
+                                light.intensity = .50;
+                                break;
+                            case 'medium':
+                                light.intensity = .40;
+                                break;
+                            case 'difficult':
+                                light.intensity = .30;
+                                break;
+                            }
                             gameState = "play";
                         }
                         break;
@@ -236,13 +260,16 @@
                             //                            gameState = "fade out";
                             if (isHighscore(time)) {
                                 $('div#highscoreModal').modal('show');
+                                resetState();
                             } else {
                                 $('div#endgameModal').modal('show');
+                                resetState();
                             }
                         }
                         break;
 
                     case 'fade out':
+                        
                         updatePhysics();
                         updateGraphics();
                         light.intensity += 0.1 * (0.0 - light.intensity);

@@ -109,26 +109,26 @@ function triggerPowerup(powerup) {
 
     switch (powerup) {
         case 'speedB':
-//            console.log('test');
+            //            console.log('test');
             this.ballSpeed = 1;
             console.log(ballSpeed)
             setTimeout(normalSpeed, 5000);
             break;
         case 'speedD':
-//            console.log('test1');
+            //            console.log('test1');
             ballSpeed = 0.8;
             console.log(ballSpeed)
             setTimeout(normalSpeed, 5000);
             break;
         case 'viewB':
-//            console.log('test2');
+            //            console.log('test2');
             camZoomIncrement = 5
             camZoom = camZoom + camZoomIncrement;
             light.intensity = 1;
             setTimeout(normalView, 5000);
             break;
         case 'viewD':
-//            console.log('test3');
+            //            console.log('test3');
             camZoomIncrement = -10
             camZoom = camZoom + camZoomIncrement;
             light.intensity = 0.25;
@@ -143,7 +143,18 @@ function normalSpeed() {
 }
 
 function normalView() {
-    light.intensity = 0.5;
+    switch (difficultyLevel) {
+        case 'easy':
+            light.intensity = .50;
+            break;
+        case 'medium':
+            light.intensity = .40;
+            break;
+        case 'difficult':
+            light.intensity = .30;
+            break;
+    }
+//    light.intensity = 0.5;
     camZoom = camZoom - camZoomIncrement;
 }
 
@@ -155,4 +166,17 @@ function sleep(milliseconds) {
             break;
         }
     }
+}
+
+function resetState() {
+    for (var j = 0; j < powerUps.length; j++) {
+        powerUps[j].getMesh().scale.set(0, 0, 0);
+    }
+    powerUps = [];
+    freeSpaces = [];
+    powerupSpaces = [];
+    light.intensity = 0.5;
+    ballSpeed = 0.95;
+    camZoom = 20;
+    camZoomIncrement = 0;
 }
