@@ -10,8 +10,16 @@
         <script src="js/PowerUp.js"></script>
         <script src="js/powerUpPlus.js"></script>
 
+        <link rel="stylesheet" type="text/css" href="semantic/semantic.min.css">
+        <script src="semantic/semantic.min.js"></script>
+
         <script>
             var gameState = undefined;
+
+            // variables for gameplay
+            var map = undefined;
+            var difficultyLevel = undefined;
+            var time = undefined;
 
             // variables for rendering
             var scene = undefined;
@@ -126,7 +134,6 @@
                             mesh_ij.position.y = j;
                             mesh_ij.position.z = 0.5;
                             THREE.GeometryUtils.merge(dummy, mesh_ij);
-                            
                         } else {
                             freeSpaces.push(i + ',' + j);
                         }
@@ -138,9 +145,8 @@
                 var mesh = new THREE.Mesh(dummy, material)
                 return mesh;
             }
-            
-            function updatePhysics() {
 
+            function updatePhysics() {
                 // Apply "friction". 
                 var lv = ball.GetLinearVelocity();
 //                if (ballSpeed != 0.95){
@@ -148,7 +154,7 @@
 //                }
                 lv.Multiply(ballSpeed);
                 ball.SetLinearVelocity(lv);
-                
+
                 // Apply user-directed force.
                 var f = new b2Vec2(keyAxis[0]*ball.GetMass()*0.25, keyAxis[1]*ball.GetMass()*0.25);
                 ball.ApplyImpulse(f, ball.GetPosition());          
@@ -157,10 +163,8 @@
                 // Take a time step.
                 world.Step(1/60, 8, 3);
             }
-            
 
             function updateGraphics() {
-
                 // Update ball position.
                 var stepX = ball.GetPosition().x - ballMesh.position.x;
                 var stepY = ball.GetPosition().y - ballMesh.position.y;
@@ -177,16 +181,20 @@
                 tempMat.multiplySelf(ballMesh.matrix);
                 ballMesh.matrix = tempMat;
                 ballMesh.rotation.getRotationFromMatrix(ballMesh.matrix);
-                
+
                 // Update camera with ball
                 camera.position.x += (ballMesh.position.x - camera.position.x) * 0.1;
                 camera.position.y += (ballMesh.position.y - camera.position.y) * 0.1;
                 camera.position.z += (camZoom - camera.position.z) * 0.1;
-                
+
                 // Update light to focus on ball
                 light.position.x = camera.position.x;
                 light.position.y = camera.position.y;
                 light.position.z = camera.position.z - 4;
+            }
+
+            function isHighscore(time){
+                return false;
             }
 
             function gameLoop() {
@@ -202,7 +210,7 @@
                         light.position.set(1, 1, 1.3);
                         light.intensity = 0;
                         var level = Math.floor((mazeDimension-1)/2 - 4);
-                        $('#level').html('Level ' + level);
+                        $('#level').text(map.charAt(0).toUpperCase() + map.slice(1) + " (" + difficultyLevel.charAt(0).toUpperCase() + difficultyLevel.slice(1) + ")");
                         gameState = "fade in";
                         generatePowerUps(freeSpaces);
                         break;
@@ -224,10 +232,16 @@
                         var mazeX = Math.floor(ballMesh.position.x + 0.5);
                         var mazeY = Math.floor(ballMesh.position.y + 0.5);
                         if (mazeX == mazeDimension && mazeY == mazeDimension - 2) { 
-                            mazeDimension += 2;
-                            gameState = "fade out";
+                            //                            mazeDimension += 2;
+                            //                            gameState = "fade out";
+                            if (isHighscore(time)) {
+                                $('div#highscoreModal').modal('show');
+                            } else {
+                                $('div#endgameModal').modal('show');
+                            }
                         }
                         break;
+
                     case 'fade out':
                         updatePhysics();
                         updateGraphics();
@@ -243,59 +257,198 @@
 
                 requestAnimationFrame(gameLoop);
             }
-            
+
             function onMoveKey(axis) {
                 keyAxis = axis.slice(0);
             }
-            
+
             function onJumpKey(axis) {
                 console.log("jumping")
+            }
+
+            function saveHighScore(time){
+
             }
 
             $(document).ready(function(){
                 // Create the renderer
                 renderer = new THREE.WebGLRenderer();
                 renderer.setSize(window.innerWidth, window.innerHeight);
-                document.body.appendChild(renderer.domElement);
-                
+                //                    document.body.appendChild(renderer.domElement);
+                $("div#canvas").append(renderer.domElement)
+
                 // Bind keyboard controls
                 KeyboardJS.bind.axis('left', 'right', 'down', 'up', onMoveKey);
                 KeyboardJS.bind.key('spacebar', onJumpKey);
-                $("body").click(function(){
-                    console.log(camera)
-                    camZoom -= 5;
-                    
+                $("div#canvas").hide();
+
+
+                $("img").mouseenter(function(event){
+                    $("div#map").text(event.target.dataset.map);
                 })
 
-                gameState = "initialize";
-                
-                // Start the game loop.
-                requestAnimationFrame(gameLoop);
+                $("img").mouseleave(function(event){
+                    $("div#map").text("Choose a map");
+                })
 
+                $("button").click(function(event){
+                    $("button").removeClass("primary");
+                    $(event.target).addClass("primary");
+                })
+
+                $("img").click(function(event){
+                    map = event.target.dataset.map.toLowerCase()
+                    difficultyLevel = $("button.primary").text().toLowerCase()
+                    $("div.wrapper").hide()
+                    $("div#canvas").show();
+                    $("body").css("background","black");
+
+                    //                    $("body").click(function(){
+                    //                        console.log(camera)
+                    //                        camZoom -= 5;
+                    //                    })
+
+                    gameState = "initialize";
+
+                    // Start the game loop.
+                    requestAnimationFrame(gameLoop);
+                })
+
+                $("div.exitBtn").click(function(event){
+                    var tag = event.target.dataset.tag;
+                    if (tag==="save"){
+                        saveHighScore(69);
+                    }
+                    $("div.wrapper").show()
+                    $("div#canvas").hide();
+                    $("body").css("background","white");
+                    gameState = undefined;
+                })
+
+                $("div.playBtn").click(function(event){
+                    var tag = event.target.dataset.tag;
+                    if (tag==="save"){
+                        saveHighScore(69);
+                    }
+                    gameState = "initialize";
+                })
             })
 
         </script>
-
         <style>
             body{
                 margin: 0;
                 padding: 0;
                 height:100%;
-                background:black;
+                /*                background:black;*/
+                overflow: hidden;
             }
 
+            .wrapper{
+                width:800px;
+                height:100%;
+                margin:0 auto;
+                text-align: center;
+                padding-top:100px;
+            }
 
+            .title{
+                font-size:6em!important;
+            }
+
+            .subtitle{
+                font-size:2em!important;
+            }
+
+            img:hover{
+                cursor: pointer;
+                width:220px!important;
+            }
+
+            img{
+                width:200px!important;
+                transition-property: all;
+                transition-timing-function: ease-in;
+                transition-duration: .2s;
+            }
+
+            .maps{
+                margin-top:30px!important;
+                margin-bottom:30px!important;
+            }
+
+            div#canvas{
+                text-align: center;
+                padding-top:20px;
+            }
         </style>
-
     </head>
-
     <body>
 
-        <div id='level'>
-            Level 1
-        </div>        
+        <div class="wrapper">
+            <div class="ui huge header title">Ball Game</div>
+            <div class="ui header subtitle" id="map">Choose a map</div>
 
+            <div class="ui images maps">
+                <img data-map="Jungle" class="ui medium rounded image" src="Mobile.jpg">
+                <img data-map="Dungeon" class="ui medium rounded image" src="Mobile.jpg">
+                <img data-map="Space" class="ui medium rounded image" src="Mobile.jpg">
+            </div>
+
+            <div class="ui header subtitle">Choose a difficulty level</div>
+            <div class="three large ui buttons">
+                <button class="primary ui button"><i class="smile outline icon"></i>Easy</button>
+                <button class="ui button"><i class="meh outline icon"></i>Medium</button>
+                <button class="ui button"><i class="frown outline icon"></i>Difficult</button>
+            </div>
+        </div>
+        
+        <div id="canvas">
+            <div id="level" class="ui huge yellow header title">Level 1</div>      
+        </div>
+
+        <div class="ui basic modal" id="endgameModal">
+            <div class="ui icon header">
+                <i class="flag checkered icon"></i>
+                Game Finished! Time: 69
+            </div>
+            <center>
+                <div class="actions">
+                    <div class="ui green ok inverted button playBtn">
+                        <i class="redo icon"></i>
+                        Play Again
+                    </div>
+                    <div class="ui red cancel inverted button exitBtn">
+                        <i class="chevron circle left icon"></i>
+                        Exit
+                    </div>
+                </div>
+            </center>
+        </div>
+
+        <div class="ui basic modal" id="highscoreModal">
+            <div class="ui icon header">
+                <i class="flag checkered icon"></i>
+                High Score! Time: 69
+            </div>
+            <center>
+                <div class="ui input focus">
+                    <input type="text" placeholder="Florante">
+                </div>
+                <form class="ui form">
+                </form>
+                <div class="actions">
+                    <div data-tag="save" class="ui green ok inverted button playBtn">
+                        <i class="redo icon"></i>
+                        Save & Play Again
+                    </div>
+                    <div data-tag="save" class="ui red cancel inverted button exitBtn">
+                        <i class="chevron circle left icon"></i>
+                        Save & Exit
+                    </div>
+                </div>
+            </center>
+        </div>
     </body>
-
 </html>
 
