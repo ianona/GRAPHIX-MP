@@ -8,8 +8,9 @@
         <script src="js/jquery.js"></script>
         <script src="js/maze.js"></script>
         <script src="js/PowerUp.js"></script>
-        <script src="js/powerUpPlus.js"></script>
         <script src="js/GLTFLoader.js"></script>
+        <script src="js/class/powerUpPlus.js"></script>
+        <script src="js/class/HighScore.js"></script>
 
         <link rel="stylesheet" type="text/css" href="semantic/semantic.min.css">
         <script src="semantic/semantic.min.js"></script>
@@ -20,7 +21,8 @@
             // variables for gameplay
             var map = undefined;
             var difficultyLevel = undefined;
-            var time = undefined;
+            var highscore = undefined;
+            var timeVal = undefined;
 
             // variables for rendering
             var scene = undefined;
@@ -252,8 +254,13 @@
                 
             }
 
-            function isHighscore(time){
-                return false;
+            function isHighscore(score){
+                if (highscore == undefined || score < highscore.getTime()){
+                    timeVal = score;
+                    console.log("HIGHSCORE CHECKED");
+                    return true;
+                } else
+                    return false;
             }
 
             function gameLoop() {
@@ -285,9 +292,21 @@
 //                        var level = Math.floor((mazeDimension-1)/2 - 4);
                         $('#level').text(map.charAt(0).toUpperCase() + map.slice(1) + " (" + difficultyLevel.charAt(0).toUpperCase() + difficultyLevel.slice(1) + ")");
                         gameState = "fade in";
-                        generatePowerUps(freeSpaces);
-
+                        switch (difficultyLevel){
+                            case 'easy':
+                                generatePowerUps(freeSpaces, 3);
+                                break;
+                            case 'medium':
+                                generatePowerUps(freeSpaces, 7);
+                                break;
+                            case 'difficult':
+                                generatePowerUps(freeSpaces, 10);
+                                break;
+                        }
+                        clearTimer();
+                        timer();
                         break;
+                        
                     case "fade in":
                         light.intensity += 0.1 * (1.0 - light.intensity);
                         renderer.render(scene, camera);
@@ -308,9 +327,11 @@
                         }
                         break;
                     case 'play':
+                        
                         updatePhysics();
                         updateGraphics();
                         detectPowerupCollision()
+                        rotatePowerups()
                         renderer.render(scene, camera);
 
                         // Check for victory.
@@ -319,18 +340,21 @@
                         if (mazeX == mazeDimension && mazeY == mazeDimension - 2) { 
                             //                            mazeDimension += 2;
                             //                            gameState = "fade out";
-                            if (isHighscore(time)) {
+                            if (isHighscore(h1.textContent)) {
                                 $('div#highscoreModal').modal('show');
-                                resetState();
+                                resetState()
+                                resetTimer();
+                                gameState = undefined;
                             } else {
                                 $('div#endgameModal').modal('show');
-                                resetState();
+                                resetState()
+                                resetTimer();
+                                gameState = undefined;
                             }
                         }
                         break;
 
                     case 'fade out':
-
                         updatePhysics();
                         updateGraphics();
                         light.intensity += 0.1 * (0.0 - light.intensity);
@@ -358,12 +382,14 @@
                 console.log(light)
             }
 
-            function saveHighScore(time){
-
+            function saveHighScore(){
+                highscore = new HighScore(timeVal, $("input#highscoreName").val(), map, difficultyLevel);
             }
 
             $(document).ready(function(){
                 // Create the renderer
+                $("h1#timer").hide();
+                $("h1#highscore").hide();
                 renderer = new THREE.WebGLRenderer();
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 //                    document.body.appendChild(renderer.domElement);
@@ -394,7 +420,7 @@
                     $("div.wrapper").hide()
                     $("div#canvas").show();
                     $("body").css("background","black");
-
+                    $("h1#timer").show();
                     //                    $("body").click(function(){
                     //                        console.log(camera)
                     //                        camZoom -= 5;
@@ -409,18 +435,27 @@
                 $("div.exitBtn").click(function(event){
                     var tag = event.target.dataset.tag;
                     if (tag==="save"){
-                        saveHighScore(69);
+                        saveHighScore();
                     }
+                    console.log(tag);
+                    console.log(highscore);
+                    if (highscore != undefined){
+                        $("h1#highscore").text("Highscore: " + highscore.getTime() + " Name: " + highscore.getName() + " Map: " + highscore.getMap() + " Difficulty: " + highscore.getDifficulty());
+                        $("h1#highscore").show();
+                    }
+                    $("h1#timer").hide();
                     $("div.wrapper").show()
                     $("div#canvas").hide();
                     $("body").css("background","white");
                     gameState = undefined;
+                    
+                    
                 })
 
                 $("div.playBtn").click(function(event){
                     var tag = event.target.dataset.tag;
                     if (tag==="save"){
-                        saveHighScore(69);
+                        saveHighScore();
                     }
                     gameState = "initialize";
                 })
@@ -476,7 +511,8 @@
         </style>
     </head>
     <body>
-
+        <h1 style='color:white;' id='timer'><time>00:00:00</time></h1>
+        <h1 style='color:black;' id='highscore'><time>00:00:00</time></h1>
         <div class="wrapper">
             <div class="ui huge header title">Ball Game</div>
             <div class="ui header subtitle" id="map">Choose a map</div>
@@ -501,9 +537,9 @@
         </div>
 
         <div class="ui basic modal" id="endgameModal">
-            <div class="ui icon header">
+            <div class="ui icon header" id='timeMessage'>
                 <i class="flag checkered icon"></i>
-                Game Finished! Time: 69
+                Game Finished! Time:
             </div>
             <center>
                 <div class="actions">
@@ -520,13 +556,14 @@
         </div>
 
         <div class="ui basic modal" id="highscoreModal">
-            <div class="ui icon header">
-                <i class="flag checkered icon"></i>
-                High Score! Time: 69
+            
+            <div class="ui icon header" id='timeMessage2'>
+                <div><i class="flag checkered icon"></i></div>
+                High Score! Time:
             </div>
             <center>
                 <div class="ui input focus">
-                    <input type="text" placeholder="Florante">
+                    <input type="text" placeholder="Florante" id="highscoreName">
                 </div>
                 <form class="ui form">
                 </form>
@@ -543,5 +580,6 @@
             </center>
         </div>
     </body>
+    <script src="js/timer.js"></script>
 </html>
 
