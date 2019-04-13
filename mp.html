@@ -25,6 +25,9 @@
             var difficultyLevel = undefined;
             var highscores = [];
             var timeVal = undefined;
+            var A1 = undefined;
+            var A2 = undefined;
+            var A3 = undefined;
 
             // variables for rendering
             var scene = undefined;
@@ -419,6 +422,7 @@
             function gameLoop() {
                 switch (gameState) {
                     case "initialize":
+                        playMusic(map);
                         console.log("initializing game...")
                         switch (difficultyLevel){
                             case 'easy':
@@ -481,7 +485,7 @@
                         }
                         break;
                     case 'play':
-
+                        console.log(camZoom);
                         updatePhysics();
                         updateGraphics();
                         detectPowerupCollision()
@@ -540,10 +544,42 @@
             function saveHighScore(){
                 highscores.push(new HighScore(timeVal, $("input#highscoreName").val(), map, difficultyLevel))
                 highscores.sort(function(a,b){return a.getTime()-b.getTime()})
-                highscores.length = 5
+                if (highscores.length > 5){
+                    highscores.length = 5
+                }
+                
+            }
+            
+            function playMusic(mapVal){
+                switch (mapVal){
+                    case 'jungle':
+                        A1.play()
+                        break;
+                    case 'dungeon':
+                        A2.play()
+                        break;
+                    case 'space':
+                        A3.play();
+                        break;
+                }
+            }
+            
+            function stopMusic(){
+                A1.pause();
+                A2.pause();
+                A3.pause();
+                A1.currentTime = 0;
+                A2.currentTime = 0;
+                A3.currentTime = 0;
             }
 
             $(document).ready(function(){
+                A1 = document.getElementById("jungle_Audio");
+                A2 = document.getElementById("dungeon_Audio");
+                A3 = document.getElementById("space_Audio");
+                A1.pause();
+                A2.pause();
+                A3.pause();
                 // Create the renderer
                 $("h1#timer").hide();
                 $("h1#highscore").hide();
@@ -599,7 +635,8 @@
                     $("div.wrapper").show()
                     $("div#canvas").hide();
                     $("body").css("background","white");
-                    gameState = undefined;   
+                    gameState = undefined;
+                    stopMusic()
                 })
 
                 $("div.playBtn").click(function(event){
@@ -703,6 +740,12 @@
         </style>
     </head>
     <body>
+        <audio id="jungle_Audio" src="assets/JUNGLE_MUSIC1.mp3" preload="auto">
+</audio>    
+        <audio id="dungeon_Audio" src="assets/DUNGEON_MUSIC.mp3" preload="auto">
+</audio>
+        <audio id="space_Audio" src="assets/SPACE_MUSIC.mp3" preload="auto">
+</audio>
         <h1 style='color:white;' id='timer'><time>00:00:00</time></h1>
         <h1 style='color:black;' id='highscore'><time>00:00:00</time></h1>
         <div class="wrapper">
