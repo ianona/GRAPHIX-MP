@@ -9,6 +9,7 @@
         <script src="js/maze.js"></script>
         <script src="js/PowerUp.js"></script>
         <script src="js/powerUpPlus.js"></script>
+        <script src="js/GLTFLoader.js"></script>
 
         <link rel="stylesheet" type="text/css" href="semantic/semantic.min.css">
         <script src="semantic/semantic.min.js"></script>
@@ -29,6 +30,7 @@
             var mazeMesh = undefined;
             var planeMesh = undefined;
             var camZoom = 20;
+            var firstPerson = false;
 
             // variables to model physics
             var maze = undefined;
@@ -37,13 +39,21 @@
             var keyAxis = [0, 0];
             var world = undefined;
             var ball = undefined;
-            
+
             //For power ups
             var freeSpaces = [];
             var powerupSpaces = [];
             var powerUps = []; // list of powerup objects
             var ballSpeed = 0.95;
             var camZoomIncrement = 0;
+            
+            // variables for textures
+            var jungleFloor    = THREE.ImageUtils.loadTexture("assets/jungle_floor.jpg")
+            var jungleWall    = THREE.ImageUtils.loadTexture("assets/jungle_wall.jpg")
+            var dungeonFloor    = THREE.ImageUtils.loadTexture("assets/dungeon_floor.jpg")
+            var dungeonWall    = THREE.ImageUtils.loadTexture("assets/dungeon_wall.jpg")
+            var spaceFloor    = THREE.ImageUtils.loadTexture("assets/space_floor.png")
+            var spaceWall    = THREE.ImageUtils.loadTexture("assets/space_wall.jpg")
 
             // Box2D shortcuts
             var b2World        = Box2D.Dynamics.b2World,
@@ -113,13 +123,43 @@
                 scene.add(mazeMesh);
 
                 // Add the ground.
-                //                planeTexture.wrapS = planeTexture.wrapT = THREE.RepeatWrapping;
-                //                planeTexture.repeat.set(mazeDimension*5, mazeDimension*5);
                 planeMesh = new THREE.Mesh(new THREE.PlaneGeometry(mazeDimension, mazeDimension, mazeDimension, mazeDimension),
                                            new THREE.MeshPhongMaterial({color: 0x7fd9a9,specular: 0xffffff, shininess: 30, flatShading:false}));
+            
                 planeMesh.position.set((mazeDimension-1)/2, (mazeDimension-1)/2, 0);
                 planeMesh.rotation.set(Math.PI/2, 0, 0);
                 scene.add(planeMesh);                
+            }
+
+            function initMap(){
+                //                const objLoader = new THREE.OBJLoader()
+                //                objLoader.setPath("/blender/")
+                //                const mtlLoader = new THREE.MTLLoader()
+                //                mtlLoader.setPath("/blender/")
+                switch(map){
+                    case "jungle":
+                        console.log("loading...")
+                        //                    new Promise((resolve)=>{
+                        //                        mtlLoader.load("rockv1.mtl",(material)=>{
+                        //                            resolve(material)
+                        //                        })
+                        //                    }).then((material)=>{
+                        //                        material.preload()
+                        //                    })
+                        //                        var loader = new THREE.GLTFLoader();
+            
+                        planeMesh.material = new THREE.MeshPhongMaterial({map:jungleFloor,specular: 0xffffff, shininess: 30, flatShading:false})
+                        mazeMesh.material = new THREE.MeshPhongMaterial({map:jungleWall,specular: 0xffffff, shininess: 30, flatShading:false,specular: 0xffffff, shininess: 30, flatShading:false})
+                        break;
+                        case "dungeon":
+                         planeMesh.material = new THREE.MeshPhongMaterial({map:dungeonFloor,specular: 0xffffff, shininess: 30, flatShading:false})
+                        mazeMesh.material = new THREE.MeshPhongMaterial({map:dungeonWall,specular: 0xffffff, shininess: 30, flatShading:false,specular: 0xffffff, shininess: 30, flatShading:false})
+                        break;
+                        case "space":
+                        planeMesh.material = new THREE.MeshPhongMaterial({map:spaceFloor,specular: 0xffffff, shininess: 30, flatShading:false})
+                        mazeMesh.material = new THREE.MeshPhongMaterial({map:spaceWall,specular: 0xffffff, shininess: 30, flatShading:false,specular: 0xffffff, shininess: 30, flatShading:false})
+                        break;
+                }
             }
 
             function generate_maze_mesh(field) {
@@ -148,9 +188,9 @@
             function updatePhysics() {
                 // Apply "friction". 
                 var lv = ball.GetLinearVelocity();
-//                if (ballSpeed != 0.95){
-//                    console.log(ballSpeed);
-//                }
+                //                if (ballSpeed != 0.95){
+                //                    console.log(ballSpeed);
+                //                }
                 lv.Multiply(ballSpeed);
                 ball.SetLinearVelocity(lv);
 
@@ -181,15 +221,35 @@
                 ballMesh.matrix = tempMat;
                 ballMesh.rotation.getRotationFromMatrix(ballMesh.matrix);
 
-                // Update camera with ball
-                camera.position.x += (ballMesh.position.x - camera.position.x) * 0.1;
-                camera.position.y += (ballMesh.position.y - camera.position.y) * 0.1;
-                camera.position.z += (camZoom - camera.position.z) * 0.1;
+                if (firstPerson) {
+                    camera.position.x += (ballMesh.position.x - camera.position.x) * 0.1;
+                    //                    camera.position.y += (ballMesh.position.y - camera.position.y) * 0.1;
+                    camera.position.y = ballMesh.position.y - (camZoom/2)
+                    //                    camera.position.z += (camZoom - camera.position.z) * 0.1;
+                    camera.position.z = 4
+                    camera.rotation.set(1,0,0)
+                    camera.up.set(0,0,1)
 
-                // Update light to focus on ball
+                    // Update light to focus on ball
+                light.position.x = camera.position.x;
+                light.position.y = camera.position.y;
+                light.position.z = camera.position.z - 2
+                light.rotation.set(3,0,0)
+                } else {
+                    // Update camera with ball
+                    camera.rotation.set(0,0,0)
+                    light.rotation.set(0,0,0)
+                    camera.position.x += (ballMesh.position.x - camera.position.x) * 0.1;
+                    camera.position.y += (ballMesh.position.y - camera.position.y) * 0.1;
+                    camera.position.z += (camZoom - camera.position.z) * 0.1;
+
+                    // Update light to focus on ball
                 light.position.x = camera.position.x;
                 light.position.y = camera.position.y;
                 light.position.z = camera.position.z - 4;
+                }
+
+                
             }
 
             function isHighscore(time){
@@ -203,29 +263,30 @@
                         switch (difficultyLevel){
                             case 'easy':
                                 mazeDimension  = 15;
-                                camZoom = 20;
+                                camZoom = 10;
                                 break;
                             case 'medium':
                                 mazeDimension  = 23;
-                                camZoom = 17;
+                                camZoom = 8;
                                 break;
                             case 'difficult':
                                 mazeDimension  = 31;
-                                camZoom = 14;
+                                camZoom = 5;
                                 break;
                         }
                         maze = generateSquareMaze(mazeDimension);
                         maze[mazeDimension-1][mazeDimension-2] = false;
                         initPhysics();
                         initGraphics();
+                        initMap();
                         camera.position.set(1, 1, 5);
                         light.position.set(1, 1, 1.3);
                         light.intensity = 0;
-                        var level = Math.floor((mazeDimension-1)/2 - 4);
+//                        var level = Math.floor((mazeDimension-1)/2 - 4);
                         $('#level').text(map.charAt(0).toUpperCase() + map.slice(1) + " (" + difficultyLevel.charAt(0).toUpperCase() + difficultyLevel.slice(1) + ")");
                         gameState = "fade in";
                         generatePowerUps(freeSpaces);
-                        
+
                         break;
                     case "fade in":
                         light.intensity += 0.1 * (1.0 - light.intensity);
@@ -233,15 +294,15 @@
                         if (Math.abs(light.intensity - 1.0) < 0.05) {
                             light.intensity = .50;
                             switch (difficultyLevel){
-                            case 'easy':
-                                light.intensity = .50;
-                                break;
-                            case 'medium':
-                                light.intensity = .40;
-                                break;
-                            case 'difficult':
-                                light.intensity = .30;
-                                break;
+                                case 'easy':
+                                    light.intensity = .50;
+                                    break;
+                                case 'medium':
+                                    light.intensity = .40;
+                                    break;
+                                case 'difficult':
+                                    light.intensity = .30;
+                                    break;
                             }
                             gameState = "play";
                         }
@@ -251,7 +312,7 @@
                         updateGraphics();
                         detectPowerupCollision()
                         renderer.render(scene, camera);
-                        
+
                         // Check for victory.
                         var mazeX = Math.floor(ballMesh.position.x + 0.5);
                         var mazeY = Math.floor(ballMesh.position.y + 0.5);
@@ -269,7 +330,7 @@
                         break;
 
                     case 'fade out':
-                        
+
                         updatePhysics();
                         updateGraphics();
                         light.intensity += 0.1 * (0.0 - light.intensity);
@@ -291,6 +352,10 @@
 
             function onJumpKey(axis) {
                 console.log("jumping")
+                firstPerson = !firstPerson
+                camera.position.set(1, 1, 5);
+                // light.position.set(1, 1, 1.3);
+                console.log(light)
             }
 
             function saveHighScore(time){
@@ -417,9 +482,9 @@
             <div class="ui header subtitle" id="map">Choose a map</div>
 
             <div class="ui images maps">
-                <img data-map="Jungle" class="ui medium rounded image" src="Mobile.jpg">
-                <img data-map="Dungeon" class="ui medium rounded image" src="Mobile.jpg">
-                <img data-map="Space" class="ui medium rounded image" src="Mobile.jpg">
+                <img data-map="Jungle" class="ui medium rounded image" src="assets/jungle_menu.png">
+                <img data-map="Dungeon" class="ui medium rounded image" src="assets/dungeon_menu.png">
+                <img data-map="Space" class="ui medium rounded image" src="assets/space_menu.png">
             </div>
 
             <div class="ui header subtitle">Choose a difficulty level</div>
@@ -429,9 +494,10 @@
                 <button class="ui button"><i class="frown outline icon"></i>Difficult</button>
             </div>
         </div>
-        
+
         <div id="canvas">
-            <div id="level" class="ui huge yellow header title">Level 1</div>      
+            <div id="level" class="ui huge yellow header title">Level 1</div>     
+            <div id="buff" class="ui yellow huge header subtitle"></div>  
         </div>
 
         <div class="ui basic modal" id="endgameModal">

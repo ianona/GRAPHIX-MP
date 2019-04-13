@@ -95,7 +95,7 @@ function detectPowerupCollision() {
                 if (powerupSpaces[i] == powerUps[j].getMesh().name) {
                     powerUps[j].getMesh().scale.set(0, 0, 0);
                     powerupSpaces.splice(powerupSpaces.indexOf(powerupSpaces[i]), 1);
-                    console.log(powerUps[j].getPowertype() + ' POWER UP HIT')
+                    console.log(powerUps[j].getPowertype() + ' POWER UP HIT hihi')
                     triggerPowerup(powerUps[j].getPowertype());
                     //                                powerUps.splice(powerUps.indexOf(powerUps[j]), 1);
                     return null;
@@ -105,20 +105,23 @@ function detectPowerupCollision() {
     }
 }
 
+var currentBuffs = []
 function triggerPowerup(powerup) {
-
+    console.log("IM OVER HERE")
     switch (powerup) {
         case 'speedB':
             //            console.log('test');
             this.ballSpeed = 1;
             console.log(ballSpeed)
             setTimeout(normalSpeed, 5000);
+            $("div#buff").text("SPEED Buff")
             break;
         case 'speedD':
             //            console.log('test1');
             ballSpeed = 0.8;
             console.log(ballSpeed)
             setTimeout(normalSpeed, 5000);
+            $("div#buff").text("SPEED Debuff")
             break;
         case 'viewB':
             //            console.log('test2');
@@ -126,6 +129,7 @@ function triggerPowerup(powerup) {
             camZoom = camZoom + camZoomIncrement;
             light.intensity = 1;
             setTimeout(normalView, 5000);
+            $("div#buff").text("VIEW Buff")
             break;
         case 'viewD':
             //            console.log('test3');
@@ -133,16 +137,29 @@ function triggerPowerup(powerup) {
             camZoom = camZoom + camZoomIncrement;
             light.intensity = 0.25;
             setTimeout(normalView, 5000);
+            $("div#buff").text("VIEW Debuff")
             break;
-
     }
+    var type = powerup.substr(0,powerup.length-1)
+    currentBuffs = currentBuffs.filter(powerup =>
+        !powerup.includes(type)
+    )
+    currentBuffs.push(powerup)
+    updateBuffText()
 }
 
 function normalSpeed() {
+    currentBuffs = currentBuffs.filter(powerup=>
+        !powerup.includes("speed")
+    )
     ballSpeed = 0.95;
+    updateBuffText()
 }
 
 function normalView() {
+    currentBuffs = currentBuffs.filter(powerup=>
+        !powerup.includes("view")
+    )
     switch (difficultyLevel) {
         case 'easy':
             light.intensity = .50;
@@ -156,6 +173,17 @@ function normalView() {
     }
 //    light.intensity = 0.5;
     camZoom = camZoom - camZoomIncrement;
+    updateBuffText()
+}
+
+function updateBuffText(){
+    console.log(currentBuffs)
+    $("div#buff").text("")
+    currentBuffs.forEach(function(powerup){
+    var type = powerup.substr(0,powerup.length-1)
+    var buff = powerup.substr(-1)
+    $("div#buff").text($("div#buff").text() + "\n" + type + " " + buff)
+    })
 }
 
 //for delays
