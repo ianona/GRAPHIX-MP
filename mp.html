@@ -7,6 +7,8 @@
         <script src="js/keyboard.js"></script>
         <script src="js/jquery.js"></script>
         <script src="js/maze.js"></script>
+        <script src="js/PowerUp.js"></script>
+        <script src="js/powerUpPlus.js"></script>
 
         <script>
             var gameState = undefined;
@@ -27,6 +29,14 @@
             var keyAxis = [0, 0];
             var world = undefined;
             var ball = undefined;
+            
+            //For power ups
+            var freeSpaces = [];
+            var powerupSpaces = [];
+            var powerUps = []; // list of powerup objects
+            var ballSpeed = 0.95;
+            var camZoomIncrement = 0;
+            var extraIntensity = 0;
 
             // Box2D shortcuts
             var b2World        = Box2D.Dynamics.b2World,
@@ -117,6 +127,8 @@
                             mesh_ij.position.z = 0.5;
                             THREE.GeometryUtils.merge(dummy, mesh_ij);
                             
+                        } else {
+                            freeSpaces.push(i + ',' + j);
                         }
                     }
                 }
@@ -131,7 +143,10 @@
 
                 // Apply "friction". 
                 var lv = ball.GetLinearVelocity();
-                lv.Multiply(.95);
+//                if (ballSpeed != 0.95){
+//                    console.log(ballSpeed);
+//                }
+                lv.Multiply(ballSpeed);
                 ball.SetLinearVelocity(lv);
                 
                 // Apply user-directed force.
@@ -189,7 +204,7 @@
                         var level = Math.floor((mazeDimension-1)/2 - 4);
                         $('#level').html('Level ' + level);
                         gameState = "fade in";
-
+                        generatePowerUps(freeSpaces);
                         break;
                     case "fade in":
                         light.intensity += 0.1 * (1.0 - light.intensity);
@@ -202,8 +217,9 @@
                     case 'play':
                         updatePhysics();
                         updateGraphics();
+                        detectPowerupCollision()
                         renderer.render(scene, camera);
-
+                        
                         // Check for victory.
                         var mazeX = Math.floor(ballMesh.position.x + 0.5);
                         var mazeY = Math.floor(ballMesh.position.y + 0.5);
@@ -277,7 +293,7 @@
 
         <div id='level'>
             Level 1
-        </div>
+        </div>        
 
     </body>
 
