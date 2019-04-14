@@ -126,16 +126,18 @@ function triggerPowerup(powerup) {
             break;
         case 'viewB':
                         
-            camZoomIncrement = 3
-            camZoom = camZoom + camZoomIncrement;
+//            camZoomIncrement = 3
+//            camZoom = camZoom + camZoomIncrement;
+            increaseView();
             light.intensity = 1;
             setTimeout(normalView, 5000);
             $("div#buff").text("VIEW Buff")
             break;
         case 'viewD':
             //            console.log('test3');
-            camZoomIncrement = -3
-            camZoom = camZoom + camZoomIncrement;
+//            camZoomIncrement = -3
+//            camZoom = camZoom + camZoomIncrement;
+            decreaseView();
             light.intensity = 0.25;
             setTimeout(normalView, 5000);
             $("div#buff").text("VIEW Debuff")
@@ -147,6 +149,34 @@ function triggerPowerup(powerup) {
     )
     currentBuffs.push(powerup)
     updateBuffText()
+}
+
+function decreaseView(){
+    switch (difficultyLevel){
+        case 'easy':
+            camZoom = 7;
+            break;
+        case 'medium':
+            camZoom = 5;
+            break;
+        case 'difficult':
+            camZoom = 3;
+            break;
+    }
+}
+
+function increaseView(){
+    switch (difficultyLevel){
+        case 'easy':
+            camZoom = 13;
+            break;
+        case 'medium':
+            camZoom = 11;
+            break;
+        case 'difficult':
+            camZoom = 8;
+            break;
+    }
 }
 
 function normalSpeed() {
