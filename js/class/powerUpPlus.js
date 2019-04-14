@@ -2,7 +2,7 @@ function generatePowerUps(vacantAreas, amount) {
     //get 4 random unique places
     var places = 0;
     var randomIndex
-//    console.log(vacantAreas[0] + "TESTING VACANT AREA")
+    //    console.log(vacantAreas[0] + "TESTING VACANT AREA")
     while (places != amount) {
         randomIndex = Math.floor(Math.random() * vacantAreas.length);
         if (powerupSpaces.indexOf(vacantAreas[randomIndex]) == -1 && randomIndex != 0) {
@@ -115,38 +115,34 @@ function triggerPowerup(powerup) {
             this.ballSpeed = 1;
             console.log(ballSpeed)
             setTimeout(normalSpeed, 5000);
-            $("div#buff").text("SPEED Buff")
             break;
         case 'speedD':
             //            console.log('test1');
             ballSpeed = 0.8;
             console.log(ballSpeed)
             setTimeout(normalSpeed, 5000);
-            $("div#buff").text("SPEED Debuff")
             break;
         case 'viewB':
-                        
-//            camZoomIncrement = 3
-//            camZoom = camZoom + camZoomIncrement;
+
+            //            camZoomIncrement = 3
+            //            camZoom = camZoom + camZoomIncrement;
             increaseView();
             light.intensity = 1;
             setTimeout(normalView, 5000);
-            $("div#buff").text("VIEW Buff")
             break;
         case 'viewD':
             //            console.log('test3');
-//            camZoomIncrement = -3
-//            camZoom = camZoom + camZoomIncrement;
+            //            camZoomIncrement = -3
+            //            camZoom = camZoom + camZoomIncrement;
             decreaseView();
             light.intensity = 0.25;
             setTimeout(normalView, 5000);
-            $("div#buff").text("VIEW Debuff")
             break;
     }
     var type = powerup.substr(0,powerup.length-1)
     currentBuffs = currentBuffs.filter(powerup =>
-        !powerup.includes(type)
-    )
+                                       !powerup.includes(type)
+                                      )
     currentBuffs.push(powerup)
     updateBuffText()
 }
@@ -181,16 +177,16 @@ function increaseView(){
 
 function normalSpeed() {
     currentBuffs = currentBuffs.filter(powerup=>
-        !powerup.includes("speed")
-    )
+                                       !powerup.includes("speed")
+                                      )
     ballSpeed = 0.95;
     updateBuffText()
 }
 
 function normalView() {
     currentBuffs = currentBuffs.filter(powerup=>
-        !powerup.includes("view")
-    )
+                                       !powerup.includes("view")
+                                      )
     switch (difficultyLevel) {
         case 'easy':
             light.intensity = .50;
@@ -205,10 +201,10 @@ function normalView() {
             camZoom = 5;
             break;
     }
-//    light.intensity = 0.5;
-//    camZoom = camZoom - camZoomIncrement;
-//    console.log("CAAAAAAAAAAAAAMZOME")
-//    console.log(camZoom + " CAMZOOM VALUE");
+    //    light.intensity = 0.5;
+    //    camZoom = camZoom - camZoomIncrement;
+    //    console.log("CAAAAAAAAAAAAAMZOME")
+    //    console.log(camZoom + " CAMZOOM VALUE");
     updateBuffText()
 }
 
@@ -216,9 +212,11 @@ function updateBuffText(){
     console.log(currentBuffs)
     $("div#buff").text("")
     currentBuffs.forEach(function(powerup){
-    var type = powerup.substr(0,powerup.length-1)
-    var buff = powerup.substr(-1)
-    $("div#buff").text($("div#buff").text() + "\n" + type + " " + buff)
+        var type = powerup.substr(0,powerup.length-1)
+        var buff = powerup.substr(-1)
+        var buffText = type.charAt(0).toUpperCase() + type.slice(1) + 
+            " " + buff.toUpperCase() + (buff.toLowerCase() == "d" ? "ebuff" : "uff")
+        $("div#buff").text($("div#buff").text() + "\n" + buffText)
     })
 }
 

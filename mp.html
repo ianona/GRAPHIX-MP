@@ -8,7 +8,6 @@
         <script src="js/jquery.js"></script>
         <script src="js/maze.js"></script>
         <script src="js/PowerUp.js"></script>
-        <!-- <script src="js/GLTFLoader.js"></script> -->
         <script src="js/OBJLoader.js"></script>
         <script src="js/JSONLoader.js"></script>
         <script src="js/class/powerUpPlus.js"></script>
@@ -38,6 +37,7 @@
             var planeMesh = undefined;
             var camZoom = 20;
             var firstPerson = false;
+            var mapView = false
 
             // variables to model physics
             var maze = undefined;
@@ -52,7 +52,7 @@
             var powerupSpaces = [];
             var powerUps = []; // list of powerup objects
             var ballSpeed = 0.95;
-//            var camZoomFPZ = 4;
+            //            var camZoomFPZ = 4;
 
             // variables for textures
             var jungleFloor    = THREE.ImageUtils.loadTexture("assets/jungle_floor.jpg")
@@ -67,7 +67,8 @@
             var rockMesh = undefined
             var treeMesh = undefined
             var torchMesh = undefined
-
+            var rocketMesh = undefined
+            
             // Box2D shortcuts
             var b2World        = Box2D.Dynamics.b2World,
                 b2FixtureDef   = Box2D.Dynamics.b2FixtureDef,
@@ -189,29 +190,26 @@
 
                         treeMesh.material = new THREE.MeshPhongMaterial({map:rockTexture1,specular: 0xffffff, shininess: 30, flatShading:false})
                         treeMesh.rotation.x = 90
-                        console.log("TREE")
-                        console.log(treeMesh)
-
 
                         for (var i=0;i<mazeDimension;i++){
                             if (Math.random() < 0.4){
                                 var branchMesh = new THREE.Mesh(treeMesh.children[1].geometry,new THREE.MeshPhongMaterial({color:0x5a3b24,specular: 0xffffff, shininess: 30, flatShading:false}))
-                                branchMesh.position.set(0,i,0)
+                                branchMesh.position.set(-1,i,0)
                                 branchMesh.rotation.x = 90
                                 scene.add(branchMesh);
 
                                 var leafMesh = new THREE.Mesh(treeMesh.children[2].geometry,new THREE.MeshPhongMaterial({color:0x398933,specular: 0xffffff, shininess: 30, flatShading:false}))
-                                leafMesh.position.set(0,i,0)
+                                leafMesh.position.set(-1,i,0)
                                 leafMesh.rotation.x = 90
                                 scene.add(leafMesh);
 
                                 var branchMesh2 = new THREE.Mesh(treeMesh.children[1].geometry,new THREE.MeshPhongMaterial({color:0x5a3b24,specular: 0xffffff, shininess: 30, flatShading:false}))
-                                branchMesh2.position.set(i,mazeDimension,0)
+                                branchMesh2.position.set(i,mazeDimension+1,0)
                                 branchMesh2.rotation.x = 90
                                 scene.add(branchMesh2);
 
                                 var leafMesh2 = new THREE.Mesh(treeMesh.children[2].geometry,new THREE.MeshPhongMaterial({color:0x398933,specular: 0xffffff, shininess: 30, flatShading:false}))
-                                leafMesh2.position.set(i,mazeDimension,0)
+                                leafMesh2.position.set(i,mazeDimension+1,0)
                                 leafMesh2.rotation.x = 90
                                 scene.add(leafMesh2);
 
@@ -246,20 +244,60 @@
                                 generateTorch(i,torchMesh);
                             }
                         }
-
-
+                        
                         planeMesh.material = new THREE.MeshPhongMaterial({map:dungeonFloor,specular: 0xffffff, shininess: 30, flatShading:false})
                         mazeMesh.material = new THREE.MeshPhongMaterial({map:dungeonWall,specular: 0xffffff, shininess: 30, flatShading:false})
                         break;
                     case "space":
+                        console.log(rocketMesh)
+                        var textures = [spaceFloor,rockTexture1,spaceWall]
+                        for (var i=0;i<mazeDimension;i++){
+                            if (i%5==0 && i <= mazeDimension - 3) {
+                                generateRocket(-1,i,1.5,Math.floor(Math.random()*180) + 1,0)
+                                generateRocket(mazeDimension,i,1.5,Math.floor(Math.random()*90) + 1,0)
+                                generateRocket(i,mazeDimension,1.5,0,Math.floor(Math.random()*45))
+                            }
+                            if (i%6==0 && i <= mazeDimension - 3) {
+                                generatePlanet(0,i,4,textures[Math.floor(Math.random() * textures.length)])
+                                generatePlanet(mazeDimension,i,4,textures[Math.floor(Math.random() * textures.length)])
+                                generatePlanet(i,mazeDimension,4,textures[Math.floor(Math.random() * textures.length)])
+                            }
+                        }
+                        
                         planeMesh.material = new THREE.MeshPhongMaterial({map:spaceFloor,specular: 0xffffff, shininess: 30, flatShading:false})
                         mazeMesh.material = new THREE.MeshPhongMaterial({map:spaceWall,specular: 0xffffff, shininess: 30, flatShading:false})
                         break;
                 }
             }
+            
+            function generatePlanet(x,y,z,texture){
+                var planetMesh = new THREE.Mesh(new THREE.SphereGeometry(.5,32,32),new THREE.MeshPhongMaterial({map:texture,specular: 0xffffff, shininess: 30, flatShading:false}))
+                                planetMesh.position.set(x,y,z)
+                                scene.add(planetMesh)
+            }
+            
+            function generateRocket(x,y,z,rX,rZ){
+                // new THREE.MeshPhongMaterial({color:0x653e17,specular: 0xffffff, shininess: 30, flatShading:false})
+                var windowMesh = new THREE.Mesh(rocketMesh.children[1].geometry,new THREE.MeshPhongMaterial({color:0x2078b9,specular: 0xffffff, shininess: 30, flatShading:false}))
+                windowMesh.rotation.x = rX
+                windowMesh.rotation.z = rZ
+                windowMesh.position.set(x,y,z)
+                scene.add(windowMesh);
+                
+                var tipMesh = new THREE.Mesh(rocketMesh.children[2].geometry,new THREE.MeshPhongMaterial({color:0xdb3d3d,specular: 0xffffff, shininess: 30, flatShading:false}))
+                tipMesh.rotation.x = rX
+                tipMesh.rotation.z = rZ
+                tipMesh.position.set(x,y,z)
+                scene.add(tipMesh);
+                
+                var bodyMesh = new THREE.Mesh(rocketMesh.children[3].geometry,new THREE.MeshPhongMaterial({color:0xffffff,specular: 0xffffff, shininess: 30, flatShading:false}))
+                bodyMesh.rotation.x = rX
+                bodyMesh.rotation.z = rZ
+                bodyMesh.position.set(x,y,z)
+                scene.add(bodyMesh);
+            }
 
             function generateTorch(index,torchMesh){
-                console.log(torchMesh)
                 var handleMesh = new THREE.Mesh(torchMesh.children[3].geometry,new THREE.MeshPhongMaterial({color:0x653e17,specular: 0xffffff, shininess: 30, flatShading:false}))
                 handleMesh.position.set(0,index,.4)
                 handleMesh.rotation.x = 90
@@ -380,6 +418,20 @@
                 ballMesh.matrix = tempMat;
                 ballMesh.rotation.getRotationFromMatrix(ballMesh.matrix);
 
+                if (mapView){
+                    switch (difficultyLevel){
+                        case 'easy':
+                            camera.position.z = 35;
+                            break;
+                        case 'medium':
+                            camera.position.z = 55;
+                            break;
+                        case 'difficult':
+                            camera.position.z = 70;
+                            break;
+                    }
+                    return
+                }
                 if (firstPerson) {
                     camera.position.x += (ballMesh.position.x - camera.position.x) * 0.1;
                     //                    camera.position.y += (ballMesh.position.y - camera.position.y) * 0.1;
@@ -419,8 +471,6 @@
                     light.position.y = camera.position.y;
                     light.position.z = camera.position.z - 4;
                 }
-
-
             }
 
             function isHighscore(score){
@@ -499,19 +549,17 @@
                         }
                         break;
                     case 'play':
-                        console.log(camZoom);
+//                        console.log(camZoom);
                         updatePhysics();
                         updateGraphics();
                         detectPowerupCollision()
                         rotatePowerups()
                         renderer.render(scene, camera);
 
-                        // Check for victory.
+                        // Check if ball has exited maze
                         var mazeX = Math.floor(ballMesh.position.x + 0.5);
                         var mazeY = Math.floor(ballMesh.position.y + 0.5);
                         if (mazeX == mazeDimension && mazeY == mazeDimension - 2) { 
-                            //                            mazeDimension += 2;
-                            //                            gameState = "fade out";
                             timeVal = h1.textContent
                             if (isHighscore(timeVal)) {
                                 $('div#highscoreModal').modal('show');
@@ -526,7 +574,6 @@
                             }
                         }
                         break;
-
                     case 'fade out':
                         updatePhysics();
                         updateGraphics();
@@ -544,6 +591,7 @@
             }
 
             function onMoveKey(axis) {
+                if (!mapView)
                 keyAxis = axis.slice(0);
             }
 
@@ -561,7 +609,6 @@
                 if (highscores.length > 5){
                     highscores.length = 5
                 }
-
             }
 
             function playMusic(mapVal){
@@ -588,8 +635,31 @@
             }
 
             function updateLoader(){
-                if (treeMesh!=undefined && rockMesh!=undefined && torchMesh!=undefined) {
+                if (treeMesh!=undefined && rockMesh!=undefined && torchMesh!=undefined && rocketMesh!=undefined) {
                     $("div#loader").remove()
+                }
+            }
+
+            function toggleMapView(){
+                if (firstPerson) return
+                mapView = !mapView
+                if (mapView){
+                    KeyboardJS.unbind.key('spacebar')
+                    console.log(KeyboardJS)
+                    light.intensity = 3
+                } else {
+                    KeyboardJS.bind.key('spacebar', onJumpKey);
+                    switch (difficultyLevel){
+                        case 'easy':
+                            light.intensity = .50;
+                            break;
+                        case 'medium':
+                            light.intensity = .40;
+                            break;
+                        case 'difficult':
+                            light.intensity = .30;
+                            break;
+                    }
                 }
             }
 
@@ -614,6 +684,12 @@
                     console.log("Loaded: BLENDER Torch")
                     updateLoader()
                 });
+                
+                loader2.load( "blender/rocket.obj", function (mesh) {
+                    rocketMesh = mesh
+                    console.log("Loaded: BLENDER Rocket")
+                    updateLoader()
+                });
 
                 A1 = document.getElementById("jungle_Audio");
                 A2 = document.getElementById("dungeon_Audio");
@@ -632,6 +708,7 @@
                 // Bind keyboard controls
                 KeyboardJS.bind.axis('left', 'right', 'down', 'up', onMoveKey);
                 KeyboardJS.bind.key('spacebar', onJumpKey);
+                KeyboardJS.bind.key('m', toggleMapView);
                 $("div#canvas").hide();
 
 
