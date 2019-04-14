@@ -52,7 +52,7 @@
             var powerupSpaces = [];
             var powerUps = []; // list of powerup objects
             var ballSpeed = 0.95;
-            var camZoomIncrement = 0;
+//            var camZoomFPZ = 4;
 
             // variables for textures
             var jungleFloor    = THREE.ImageUtils.loadTexture("assets/jungle_floor.jpg")
@@ -383,9 +383,21 @@
                 if (firstPerson) {
                     camera.position.x += (ballMesh.position.x - camera.position.x) * 0.1;
                     //                    camera.position.y += (ballMesh.position.y - camera.position.y) * 0.1;
-                    camera.position.y = ballMesh.position.y - (camZoom/2)
                     //                    camera.position.z += (camZoom - camera.position.z) * 0.1;
-                    camera.position.z = 4
+                    switch (difficultyLevel){
+                        case 'easy':
+                            camera.position.y = ballMesh.position.y - (10/2)
+                            camera.position.z = 4;
+                            break;
+                        case 'medium':
+                            camera.position.y = ballMesh.position.y - (8/2)
+                            camera.position.z = 3;
+                            break;
+                        case 'difficult':
+                            camera.position.y = ballMesh.position.y - (5/2)
+                            camera.position.z = 2;
+                            break;
+                    }
                     camera.rotation.set(1,0,0)
                     camera.up.set(0,0,1)
 
@@ -769,11 +781,11 @@
         </style>
     </head>
     <body>
-        <audio id="jungle_Audio" src="assets/JUNGLE_MUSIC1.mp3" preload="auto">
+        <audio loop id="jungle_Audio" src="assets/JUNGLE_MUSIC1.mp3" preload="auto">
         </audio>    
-        <audio id="dungeon_Audio" src="assets/DUNGEON_MUSIC.mp3" preload="auto">
+        <audio loop id="dungeon_Audio" src="assets/DUNGEON_MUSIC.mp3" preload="auto">
         </audio>
-        <audio id="space_Audio" src="assets/SPACE_MUSIC.mp3" preload="auto">
+        <audio loop id="space_Audio" src="assets/SPACE_MUSIC.mp3" preload="auto">
         </audio>
         <h1 style='color:white;' id='timer'><time>00:00:00</time></h1>
         <h1 style='color:black;' id='highscore'><time>00:00:00</time></h1>
